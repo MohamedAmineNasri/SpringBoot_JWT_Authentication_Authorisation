@@ -18,6 +18,7 @@ import java.util.function.Function;
 
 @Service
 public class JwtService {
+    //JwtService check if the token expired of the user exist or not
 
     private static final String SECRET_KEY = "ZiWNkc8o7xndwmjQBr+Wyz8UCkwyi+dRj7ehppNLmb37Z/PVLLnQn5rzfd6vgUrj";
     //from this website :
