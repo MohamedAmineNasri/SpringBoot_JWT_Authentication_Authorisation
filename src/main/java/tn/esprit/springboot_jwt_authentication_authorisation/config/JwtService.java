@@ -10,6 +10,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.security.Key;
+import java.security.KeyPair;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -51,7 +52,7 @@ public class JwtService {
     public String generateToken(
             Map<String, Object> extraClaims,//Extra claims to include in the JWT payload.
             UserDetails userDetails
-            ) {
+    ) {
         return Jwts
                 .builder()
                 .setClaims(extraClaims)
@@ -81,7 +82,11 @@ public class JwtService {
     }
 
     private Key getSigningKey() {
-        byte[] keyBytes = Decoders.BASE64.decode(SECRET_KEY);
-        return Keys.hmacShaKeyFor(keyBytes);
+        // Generate an ECDSA key pair
+        KeyPair keyPair = Keys.keyPairFor(SignatureAlgorithm.ES256);
+
+        // Use the private key for signing
+        return keyPair.getPrivate();
     }
+
 }
