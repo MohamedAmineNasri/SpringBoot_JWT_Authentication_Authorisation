@@ -19,6 +19,7 @@ import tn.esprit.springboot_jwt_authentication_authorisation.entities.token.Toke
 import tn.esprit.springboot_jwt_authentication_authorisation.entities.token.TokenType;
 import tn.esprit.springboot_jwt_authentication_authorisation.repositories.TokenRepository;
 import tn.esprit.springboot_jwt_authentication_authorisation.repositories.UserRepository;
+import tn.esprit.springboot_jwt_authentication_authorisation.tfa.TwoFactorAuthenticationServ;
 
 import java.io.IOException;
 
@@ -30,6 +31,9 @@ public class AuthenticationService {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
+
+    private final TwoFactorAuthenticationServ tfaService;
+
     public AuthenticationResponse register(RegisterRequest request) {
         //this method will allow us to create a user and save it in the database and return the
         //generated token out of it
@@ -45,7 +49,7 @@ public class AuthenticationService {
         //if mfaEnabled : generate secret
 
         if (request.isMfaEnabled()){
-            user.setSecret("");
+            user.setSecret(tfaService.generateNewSecret());
         }
 
         var savedUser= repository.save(user);
@@ -53,6 +57,7 @@ public class AuthenticationService {
         var refreshToken = jwtService.generateRefreshToken(user);
         saveUserToken(savedUser, jwtToken);
         return AuthenticationResponse.builder()
+                .secretImageUri(tfaService.generateQrCodeImage(user.getSecret()))
             .accessToken(jwtToken)
                 .refreshToken(refreshToken)
                 .mfaEnabled(user.isMfaEnabled())

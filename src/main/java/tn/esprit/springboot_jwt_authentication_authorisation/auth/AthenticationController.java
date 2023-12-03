@@ -18,10 +18,16 @@ public class AthenticationController {
     private final AuthenticationService service;
 
     @PostMapping("/register")
-    public ResponseEntity<AuthenticationResponse> register(
+//    public ResponseEntity<AuthenticationResponse> register(
+    public ResponseEntity<?> register(
             @RequestBody RegisterRequest request //RegisterRequest will all the registration information
     ) {
-        return ResponseEntity.ok(service.register(request));
+//        return ResponseEntity.ok(service.register(request));
+        var response = service.register(request);
+        if (request.isMfaEnabled()) {
+            return ResponseEntity.ok(response);
+        }
+        return ResponseEntity.accepted().build();
     }
 
     @PostMapping("/authenticate")
