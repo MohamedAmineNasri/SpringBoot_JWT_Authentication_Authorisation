@@ -6,6 +6,7 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
@@ -20,7 +21,13 @@ import java.util.function.Function;
 public class JwtService {
     //JwtService check if the token expired of the user exist or not
 
-    private static final String SECRET_KEY = "ZiWNkc8o7xndwmjQBr+Wyz8UCkwyi+dRj7ehppNLmb37Z/PVLLnQn5rzfd6vgUrj";
+    //private static final String SECRET_KEY = "ZiWNkc8o7xndwmjQBr+Wyz8UCkwyi+dRj7ehppNLmb37Z/PVLLnQn5rzfd6vgUrj";
+    @Value("${jwt.secret-key}")
+    private String SECRETKEY;
+    @Value("${jwt.expiration}")
+    private long jwtExpiration;
+    @Value("${jwt.refresh.expiration}")
+    private long refreshExpiration;
     //from this website :
     // https://generate-random.org/encryption-key-generator?count=1&bytes=32&cipher=aes-256-cbc&string=&password=
 
