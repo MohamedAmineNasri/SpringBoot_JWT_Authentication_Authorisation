@@ -44,4 +44,12 @@ public class AthenticationController {
     ) throws IOException {
         service.refreshToken(request,response);
     }
+
+    @PostMapping("/verifiy")
+    public ResponseEntity<?> verifiyCode(
+            @RequestBody VerficationRequest verficationRequest
+    ) {
+        return ResponseEntity.ok(service.verifiyCode(verficationRequest));
+    }
+
 }

@@ -134,9 +134,14 @@ public class AuthenticationService {
                var authResponse = AuthenticationResponse.builder()
                        .accessToken(accessToken)
                        .refreshToken(refreshToken)
+                       .mfaEnabled(false)
                        .build();
                new ObjectMapper().writeValue(response.getOutputStream(),authResponse);
             }
         }
+    }
+
+    public AuthenticationResponse verifiyCode(VerficationRequest verficationRequest) {
+        return null;
     }
 }
