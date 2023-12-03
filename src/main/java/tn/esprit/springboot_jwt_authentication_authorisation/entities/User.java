@@ -28,6 +28,10 @@ public class User implements Serializable, UserDetails {
     private String lastName;
     private String email;
     private String password;
+
+    private boolean mfaEnabled; //multifactor authentication
+    private String secret;
+
     @Enumerated(EnumType.STRING)
     private Role role;
 

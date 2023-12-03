@@ -39,7 +39,15 @@ public class AuthenticationService {
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .role(Role.USER)
+                .mfaEnabled(request.isMfaEnabled())
                 .build();
+
+        //if mfaEnabled : generate secret
+
+        if (request.isMfaEnabled()){
+            user.setSecret("");
+        }
+
         var savedUser= repository.save(user);
         var jwtToken = jwtService.generateToken(user);
         var refreshToken = jwtService.generateRefreshToken(user);
@@ -47,6 +55,7 @@ public class AuthenticationService {
         return AuthenticationResponse.builder()
             .accessToken(jwtToken)
                 .refreshToken(refreshToken)
+                .mfaEnabled(user.isMfaEnabled())
             .build();
     }
 
