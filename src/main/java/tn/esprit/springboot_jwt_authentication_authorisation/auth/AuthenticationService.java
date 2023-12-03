@@ -1,11 +1,13 @@
 package tn.esprit.springboot_jwt_authentication_authorisation.auth;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -142,6 +144,18 @@ public class AuthenticationService {
     }
 
     public AuthenticationResponse verifiyCode(VerficationRequest verficationRequest) {
-        return null;
+        User user = repository
+                .findByEmail(verficationRequest.getEmail())
+                .orElseThrow(() -> new  EntityNotFoundException(
+                        String.format("No user found with %S", verficationRequest.getEmail())));
+        if (tfaService.isOtpNotValid(user.getSecret(), verficationRequest.getCode())) {
+            throw new BadCredentialsException("Code is uncorrect");
+        }
+        var jwtToken = jwtService.generateToken(user);
+        return AuthenticationResponse
+                .builder()
+                .accessToken(jwtToken)
+                .mfaEnabled(user.isMfaEnabled())
+                .build();
     }
 }
