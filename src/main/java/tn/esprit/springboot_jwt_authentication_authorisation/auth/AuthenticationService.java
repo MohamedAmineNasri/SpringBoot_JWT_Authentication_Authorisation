@@ -75,6 +75,13 @@ public class AuthenticationService {
         // if we get to this point it means that the user is authenticated
         var user = repository.findByEmail(request.getEmail())
                 .orElseThrow();
+        if (user.isMfaEnabled()) {
+            return AuthenticationResponse.builder()
+                    .accessToken("")
+                    .refreshToken("")
+                    .mfaEnabled(true)
+                    .build();
+        }
         //Once we get the user we generate a token using the user object and return the AuthenticationResponse
         var jwtToken = jwtService.generateToken(user);
         var refreshToken = jwtService.generateRefreshToken(user);
@@ -83,6 +90,7 @@ public class AuthenticationService {
         return AuthenticationResponse.builder()
                 .accessToken(jwtToken)
                 .refreshToken(refreshToken)
+                .mfaEnabled(false)
                 .build();
     }
 
