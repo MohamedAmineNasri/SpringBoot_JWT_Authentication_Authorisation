@@ -46,10 +46,10 @@ public class AthenticationController {
     }
 
     @PostMapping("/verifiy")
-    public ResponseEntity<?> verifiyCode(
+    public ResponseEntity<?> verifyCode(
             @RequestBody VerficationRequest verficationRequest
     ) {
-        return ResponseEntity.ok(service.verifiyCode(verficationRequest));
+        return ResponseEntity.ok(service.verifyCode(verficationRequest));
     }
 
 }

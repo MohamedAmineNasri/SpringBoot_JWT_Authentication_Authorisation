@@ -143,7 +143,9 @@ public class AuthenticationService {
         }
     }
 
-    public AuthenticationResponse verifiyCode(VerficationRequest verficationRequest) {
+    public AuthenticationResponse verifyCode(
+            VerficationRequest verficationRequest
+    ) {
         User user = repository
                 .findByEmail(verficationRequest.getEmail())
                 .orElseThrow(() -> new  EntityNotFoundException(
