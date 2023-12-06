@@ -9,6 +9,7 @@ import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
+import tn.esprit.springboot_jwt_authentication_authorisation.entities.User;
 
 import java.security.Key;
 import java.security.KeyPair;
@@ -44,9 +45,9 @@ public class JwtService {
         return Keys.keyPairFor(SignatureAlgorithm.ES256);
     }
 
-    public String extractUsername(String token) {
-        return extractClaim(token, Claims::getSubject);
-    }
+public String extractUsername(String token) {
+    return extractAllClaims(token).getSubject();
+}
 
     public String generateToken(UserDetails userDetails) {
         return generateToken(new HashMap<>(), userDetails);
@@ -61,9 +62,9 @@ public class JwtService {
         return extractExpiration(token).before(new Date());
     }
 
-    private Date extractExpiration(String token) {
-        return extractClaim(token, Claims::getExpiration);
-    }
+private Date extractExpiration(String token) {
+    return extractAllClaims(token).getExpiration();
+}
 
     public String generateToken(Map<String, Object> extraClaims, UserDetails userDetails) {
         return buildToken(extraClaims, userDetails, jwtExpiration);
@@ -73,13 +74,21 @@ public class JwtService {
         return buildToken(new HashMap<>(), userDetails, refreshExpiration);
     }
 
+
     private String buildToken(
             Map<String, Object> extraClaims,
             UserDetails userDetails,
-            long expiration)
-    {
+            long expiration) {
+        User user = (User) userDetails;
+        Map<String, Object> claims = new HashMap<>(extraClaims);
+
+        claims.put("id", user.getId());
+        claims.put("firstName", user.getFirstName());
+        claims.put("lastName", user.getLastName());
+        claims.put("role", user.getRole().name());
+
         return Jwts.builder()
-                .setClaims(extraClaims)
+                .setClaims(claims)
                 .setSubject(userDetails.getUsername())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + expiration))
@@ -87,12 +96,11 @@ public class JwtService {
                 .compact();
     }
 
-    public <T> T extractClaim(String token, Function<Claims, T> claimResolver) {
-        final Claims claims = extractAllClaims(token);
-        return claimResolver.apply(claims);
-    }
-
     private Claims extractAllClaims(String token) {
         return Jwts.parserBuilder().setSigningKey(keyPair.getPublic()).build().parseClaimsJws(token).getBody();
+    }
+
+    public Map<String, Object> extractAllClaimsAsMap(String token) {
+        return extractAllClaims(token);
     }
 }
