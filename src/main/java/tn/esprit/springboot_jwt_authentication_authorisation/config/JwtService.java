@@ -45,9 +45,9 @@ public class JwtService {
         return Keys.keyPairFor(SignatureAlgorithm.ES256);
     }
 
-public String extractUsername(String token) {
-    return extractAllClaims(token).getSubject();
-}
+    public String extractUsername(String token) {
+        return extractClaim(token, Claims::getSubject);
+    }
 
     public String generateToken(UserDetails userDetails) {
         return generateToken(new HashMap<>(), userDetails);
@@ -62,9 +62,9 @@ public String extractUsername(String token) {
         return extractExpiration(token).before(new Date());
     }
 
-private Date extractExpiration(String token) {
-    return extractAllClaims(token).getExpiration();
-}
+    private Date extractExpiration(String token) {
+        return extractClaim(token, Claims::getExpiration);
+    }
 
     public String generateToken(Map<String, Object> extraClaims, UserDetails userDetails) {
         return buildToken(extraClaims, userDetails, jwtExpiration);
@@ -73,7 +73,6 @@ private Date extractExpiration(String token) {
     public String generateRefreshToken( UserDetails userDetails) {
         return buildToken(new HashMap<>(), userDetails, refreshExpiration);
     }
-
 
     private String buildToken(
             Map<String, Object> extraClaims,
@@ -96,11 +95,12 @@ private Date extractExpiration(String token) {
                 .compact();
     }
 
-    private Claims extractAllClaims(String token) {
-        return Jwts.parserBuilder().setSigningKey(keyPair.getPublic()).build().parseClaimsJws(token).getBody();
+    public <T> T extractClaim(String token, Function<Claims, T> claimResolver) {
+        final Claims claims = extractAllClaims(token);
+        return claimResolver.apply(claims);
     }
 
-    public Map<String, Object> extractAllClaimsAsMap(String token) {
-        return extractAllClaims(token);
+    private Claims extractAllClaims(String token) {
+        return Jwts.parserBuilder().setSigningKey(keyPair.getPublic()).build().parseClaimsJws(token).getBody();
     }
 }
